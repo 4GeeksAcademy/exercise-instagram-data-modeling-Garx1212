@@ -7,28 +7,40 @@ from eralchemy2 import render_er
 
 Base = declarative_base()
 
-class Person(Base):
-    __tablename__ = 'person'
-    # Here we define columns for the table person
-    # Notice that each column is also a normal Python instance attribute.
-    id = Column(Integer, primary_key=True)
-    name = Column(String(250), nullable=False)
+class Post(Base):
+    __tablename__ = "post"
+    id = Column(Integer, primary_key = True)
+    image_src = Column(String(500), nullable = False)
+    likes_number = Column(Integer, nullable = False) 
+    description = Column(String(500), nullable = False)
+    likes = relationship("likes")
+    user_post = relationship("profile")
 
-class Address(Base):
-    __tablename__ = 'address'
-    # Here we define columns for the table address.
-    # Notice that each column is also a normal Python instance attribute.
-    id = Column(Integer, primary_key=True)
-    street_name = Column(String(250))
-    street_number = Column(String(250))
-    post_code = Column(String(250), nullable=False)
-    person_id = Column(Integer, ForeignKey('person.id'))
-    person = relationship(Person)
+class Likes(Base):
+    __tablename__ = "likes"
+    id = Column(Integer, primary_key = True)
+    name = Column(String(100), nullable = False)
+    likes_number = Column(Integer, nullable = False) 
+    post_id = Column(Integer, ForeignKey("post.id"), nullable = False)
+    favorite_posts = relationship("user")
 
-    def to_dict(self):
-        return {}
+class User(Base):
+    __tablename__ = "user"
+    id = Column(Integer, primary_key = True)
+    email = Column(String(30), nullable = False)
+    password = Column(String(500), nullable = False)
+    likes = Column(Integer, ForeignKey("likes.id"), nullable = False)
+    user_profile = relationship("profile", backref = "user")
 
-## Draw from SQLAlchemy base
+class Profile(Base):
+    __tablename__ = "profile"
+    id = Column(Integer, primary_key = True)
+    name = Column(String(20), nullable = False)
+    description = Column(String(50), nullable = True)
+    profile_pic_src = Column(String(500), nullable = True)
+    user_id = Column(Integer, ForeignKey("user.id"), nullable = False)
+    post_id = Column(Integer, ForeignKey("post.id"), nullable = False)
+
 try:
     result = render_er(Base, 'diagram.png')
     print("Success! Check the diagram.png file")
